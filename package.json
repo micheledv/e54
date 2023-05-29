@@ -1,0 +1,25 @@
+{
+  "name": "e54",
+  "version": "0.1.0",
+  "main": "build/main.js",
+  "author": "Michele Delle Vergini <michele.dellevergini@outlook.com>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "node build/main.js",
+    "jumpstart": "yarn build && yarn start",
+    "dev": "nodemon --watch src --ext ts --exec yarn jumpstart"
+  },
+  "dependencies": {
+    "dotenv": "^16.1.3",
+    "moment": "^2.29.4",
+    "node-telegram-bot-api": "^0.61.0",
+    "yaml": "^2.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.2.5",
+    "@types/node-telegram-bot-api": "^0.61.6",
+    "nodemon": "^2.0.22",
+    "typescript": "^5.0.4"
+  }
+}
