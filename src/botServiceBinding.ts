@@ -10,11 +10,9 @@ export const bindWithPrefix = (
   return (message: Message) => {
     const { text } = message
     if (!text) return false
+    if (!text.startsWith(prefix)) return false
 
-    const index = text.indexOf(prefix)
-    if (index === -1) return false
-
-    const context = text.slice(index + prefix.length + 1).trim()
+    const context = text.slice(prefix.length + 1).trim()
     service.handle(message, context)
 
     return true
