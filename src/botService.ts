@@ -93,7 +93,12 @@ export class SmartAdd implements BotService {
 
   handle(message: Message, context: string): void {
     const content = this.smartAddService.assembleQuoteContent(message)
-    if (!content) return
+    if (!content) {
+      this.bot
+        .sendMessage(message.chat.id, 'No quote to add')
+        .catch(console.error)
+      return
+    }
 
     const quote = {
       chat: message.chat.title as string,
