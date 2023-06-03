@@ -19,11 +19,12 @@ const smartAddService = new SmartAddService(20)
 
 const handler = (bindings: BotServiceBinding[]) => {
   return (message: Message) => {
+    console.log(message)
+
     const anyBindingMatched = runBindings(bindings, message)
     if (anyBindingMatched) return
 
     smartAddService.trackMessage(message)
-    console.log(message)
   }
 }
 
