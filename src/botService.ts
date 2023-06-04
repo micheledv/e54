@@ -62,7 +62,7 @@ export class QuoteByRegExp implements BotService {
   constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
 
   handle(message: Message, context: string): void {
-    const regexp = new RegExp(context)
+    const regexp = new RegExp(context, 'i')
     const matchingRecords = this.repo.select(record =>
       regexp.test(record.content)
     )
