@@ -2,13 +2,13 @@ import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { formatQuote, formatQuoteInfo, formatSmartAdd } from './formatting'
 import { Repo } from './repo'
 import { pickRandom } from './utils'
-import { SmartAddService } from './smartadd'
+import { SmartAddCollector } from './smartadd'
 
 export interface BotService {
   handle(message: Message, context: string): void
 }
 
-export class QuoteInfo implements BotService {
+export class QuoteInfoBotService implements BotService {
   constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
 
   handle(message: Message, context: string): void {
@@ -34,7 +34,7 @@ export class QuoteInfo implements BotService {
   }
 }
 
-export class QuoteById implements BotService {
+export class QuoteByIdBotService implements BotService {
   constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
 
   handle(message: Message, context: string): void {
@@ -58,7 +58,7 @@ export class QuoteById implements BotService {
   }
 }
 
-export class QuoteByRegExp implements BotService {
+export class QuoteByRegExpBotService implements BotService {
   constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
 
   handle(message: Message, context: string): void {
@@ -73,7 +73,7 @@ export class QuoteByRegExp implements BotService {
   }
 }
 
-export class RandomQuote implements BotService {
+export class RandomQuoteBotService implements BotService {
   constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
 
   handle(message: Message, context: string): void {
@@ -84,11 +84,11 @@ export class RandomQuote implements BotService {
   }
 }
 
-export class SmartAdd implements BotService {
+export class SmartAddBotService implements BotService {
   constructor(
     private readonly bot: TelegramBot,
     private readonly repo: Repo,
-    private readonly smartAddService: SmartAddService
+    private readonly smartAddService: SmartAddCollector
   ) {}
 
   handle(message: Message, context: string): void {

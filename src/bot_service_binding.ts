@@ -1,5 +1,5 @@
 import { Message } from 'node-telegram-bot-api'
-import { BotService } from './botService'
+import { BotService } from './bot_service'
 
 export type BotServiceBinding = (message: Message) => boolean
 

@@ -1,7 +1,7 @@
 import { Message } from 'node-telegram-bot-api'
 import { RollingBuffer } from './utils'
 
-export class SmartAddService {
+export class SmartAddCollector {
   private readonly contexts = new Map<string, SmartAddContext>()
 
   constructor(private readonly bufferCapacity: number) {}
