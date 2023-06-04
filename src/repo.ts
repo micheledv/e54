@@ -4,7 +4,26 @@ import { QuoteDTO } from './dto'
 
 export type PersistedRecord<T> = { id: number } & T
 
-export class Repo {
+export interface Repo {
+  get(id: number): Promise<PersistedRecord<Quote> | undefined>
+  getAll(): Promise<Array<PersistedRecord<Quote>>>
+  select(
+    predicate: (quote: PersistedRecord<Quote>) => boolean
+  ): Promise<Array<PersistedRecord<Quote>>>
+  add(quote: Quote): Promise<PersistedRecord<Quote>>
+  delete(id: number): Promise<PersistedRecord<Quote> | undefined>
+  update(
+    id: number,
+    quote: Quote,
+    editor: string
+  ): Promise<PersistedRecord<Quote> | undefined>
+  silkUpdate(
+    id: number,
+    quote: Quote
+  ): Promise<PersistedRecord<Quote> | undefined>
+}
+
+export class LocalRepo implements Repo {
   indexedData: Map<number, PersistedRecord<Quote>>
   nextId: number
 
@@ -21,56 +40,58 @@ export class Repo {
     const records = parse(fileContent).map((record: any) => {
       return QuoteDTO.toDomain(record)
     })
-    return new Repo(filepath, records)
+    return new LocalRepo(filepath, records)
   }
 
-  save() {
-    const serializedData = stringify(this.getAll().map(QuoteDTO.fromDomain))
+  async save() {
+    const allQuotes = await this.getAll()
+    const serializedData = stringify(allQuotes.map(QuoteDTO.fromDomain))
     writeFileSync(this.filepath, serializedData)
   }
 
-  get(id: number) {
+  async get(id: number) {
     return this.indexedData.get(id)
   }
 
-  getAll() {
+  async getAll() {
     return Array.from(this.indexedData.values())
   }
 
-  select(predicate: (quote: PersistedRecord<Quote>) => boolean) {
-    return this.getAll().filter(predicate)
+  async select(predicate: (quote: PersistedRecord<Quote>) => boolean) {
+    const allQuotes = await this.getAll()
+    return allQuotes.filter(predicate)
   }
 
-  add(quote: Quote) {
+  async add(quote: Quote) {
     const record = { id: this.nextId, ...quote }
     this.indexedData.set(record.id, record)
     this.nextId++
-    this.save()
+    await this.save()
     return record
   }
 
-  delete(id: number) {
+  async delete(id: number) {
     const record = this.indexedData.get(id)
     this.indexedData.delete(id)
-    this.save()
+    await this.save()
     return record
   }
 
-  update(id: number, quote: Quote, editor: string) {
+  async update(id: number, quote: Quote, editor: string) {
     const record = this.indexedData.get(id)
     if (record) {
       const lastUpdated = { by: editor, at: new Date() }
       this.indexedData.set(id, { ...record, ...quote, lastUpdated })
-      this.save()
+      await this.save()
     }
     return this.indexedData.get(id)
   }
 
-  silkUpdate(id: number, quote: Quote) {
+  async silkUpdate(id: number, quote: Quote) {
     const record = this.indexedData.get(id)
     if (record) {
       this.indexedData.set(id, { ...record, ...quote })
-      this.save()
+      await this.save()
     }
     return this.indexedData.get(id)
   }

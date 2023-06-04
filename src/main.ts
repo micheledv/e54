@@ -1,5 +1,5 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { Repo } from './repo'
+import { LocalRepo } from './repo'
 import { SmartAddCollector } from './smartadd'
 import dotenv from 'dotenv'
 import { Config } from './config'
@@ -20,14 +20,14 @@ dotenv.config()
 
 const config = Config.loadFromEnv()
 const bot = new TelegramBot(config.telegramBotToken, { polling: true })
-const repo = Repo.load('quotes.yaml')
+const repo = LocalRepo.load('quotes.yaml')
 const smartAddService = new SmartAddCollector(20)
 
 const handler = (bindings: BotServiceBinding[]) => {
-  return (message: Message) => {
+  return async (message: Message) => {
     console.log(message)
 
-    const anyBindingMatched = runBindings(bindings, message)
+    const anyBindingMatched = await runBindings(bindings, message)
     if (anyBindingMatched) return
 
     smartAddService.trackMessage(message)

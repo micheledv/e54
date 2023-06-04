@@ -1,17 +1,20 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
 import { formatQuote, formatQuoteInfo, formatSmartAdd } from './formatting'
-import { Repo } from './repo'
+import { LocalRepo } from './repo'
 import { pickRandom } from './utils'
 import { SmartAddCollector } from './smartadd'
 
 export interface BotService {
-  handle(message: Message, context: string): void
+  handle(message: Message, context: string): Promise<void>
 }
 
 export class QuoteInfoBotService implements BotService {
-  constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
+  constructor(
+    private readonly bot: TelegramBot,
+    private readonly repo: LocalRepo
+  ) {}
 
-  handle(message: Message, context: string): void {
+  async handle(message: Message, context: string) {
     const now = new Date()
     const id = Number(context)
 
@@ -20,83 +23,85 @@ export class QuoteInfoBotService implements BotService {
         .sendMessage(message.chat.id, 'Invalid quote id')
         .catch(console.error)
     } else {
-      const record = this.repo.get(id)
+      const record = await this.repo.get(id)
       if (record) {
-        this.bot
-          .sendMessage(message.chat.id, formatQuoteInfo(record, now))
-          .catch(console.error)
+        await this.bot.sendMessage(
+          message.chat.id,
+          formatQuoteInfo(record, now)
+        )
       } else {
-        this.bot
-          .sendMessage(message.chat.id, `Quote #${context} not found`)
-          .catch(console.error)
+        await this.bot.sendMessage(
+          message.chat.id,
+          `Quote #${context} not found`
+        )
       }
     }
   }
 }
 
 export class QuoteByIdBotService implements BotService {
-  constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
+  constructor(
+    private readonly bot: TelegramBot,
+    private readonly repo: LocalRepo
+  ) {}
 
-  handle(message: Message, context: string): void {
+  async handle(message: Message, context: string) {
     const id = Number(context)
     if (Number.isNaN(id)) {
-      this.bot
-        .sendMessage(message.chat.id, 'Invalid quote id')
-        .catch(console.error)
+      await this.bot.sendMessage(message.chat.id, 'Invalid quote id')
     } else {
-      const record = this.repo.get(id)
+      const record = await this.repo.get(id)
       if (record) {
-        this.bot
-          .sendMessage(message.chat.id, formatQuote(record))
-          .catch(console.error)
+        await this.bot.sendMessage(message.chat.id, formatQuote(record))
       } else {
-        this.bot
-          .sendMessage(message.chat.id, `Quote #${context} not found`)
-          .catch(console.error)
+        await this.bot.sendMessage(
+          message.chat.id,
+          `Quote #${context} not found`
+        )
       }
     }
   }
 }
 
 export class QuoteByRegExpBotService implements BotService {
-  constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
+  constructor(
+    private readonly bot: TelegramBot,
+    private readonly repo: LocalRepo
+  ) {}
 
-  handle(message: Message, context: string): void {
+  async handle(message: Message, context: string) {
     const regexp = new RegExp(context, 'i')
-    const matchingRecords = this.repo.select(record =>
+    const matchingRecords = await this.repo.select(record =>
       regexp.test(record.content)
     )
     const record = pickRandom(matchingRecords)
-    this.bot
-      .sendMessage(message.chat.id, formatQuote(record))
-      .catch(console.error)
+    await this.bot.sendMessage(message.chat.id, formatQuote(record))
   }
 }
 
 export class RandomQuoteBotService implements BotService {
-  constructor(private readonly bot: TelegramBot, private readonly repo: Repo) {}
+  constructor(
+    private readonly bot: TelegramBot,
+    private readonly repo: LocalRepo
+  ) {}
 
-  handle(message: Message, context: string): void {
-    const record = pickRandom(this.repo.getAll())
-    this.bot
-      .sendMessage(message.chat.id, formatQuote(record))
-      .catch(console.error)
+  async handle(message: Message, context: string) {
+    const record = pickRandom(await this.repo.getAll())
+    await this.bot.sendMessage(message.chat.id, formatQuote(record))
   }
 }
 
 export class SmartAddBotService implements BotService {
   constructor(
     private readonly bot: TelegramBot,
-    private readonly repo: Repo,
+    private readonly repo: LocalRepo,
     private readonly smartAddService: SmartAddCollector
   ) {}
 
-  handle(message: Message, context: string): void {
+  async handle(message: Message, context: string) {
     const content = this.smartAddService.assembleQuoteContent(message)
     if (!content) {
-      this.bot
-        .sendMessage(message.chat.id, 'No quote to add')
-        .catch(console.error)
+      await this.bot.sendMessage(message.chat.id, 'No quote to add')
       return
     }
 
@@ -108,9 +113,7 @@ export class SmartAddBotService implements BotService {
       },
       content,
     }
-    const record = this.repo.add(quote)
-    this.bot
-      .sendMessage(message.chat.id, formatSmartAdd(record))
-      .catch(console.error)
+    const record = await this.repo.add(quote)
+    await this.bot.sendMessage(message.chat.id, formatSmartAdd(record))
   }
 }
