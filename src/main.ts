@@ -1,5 +1,4 @@
 import TelegramBot, { Message } from 'node-telegram-bot-api'
-import { LocalRepo } from './repo'
 import { SmartAddCollector } from './smartadd'
 import dotenv from 'dotenv'
 import { Config } from './config'
@@ -15,6 +14,7 @@ import {
   RandomQuoteBotService,
   SmartAddBotService,
 } from './bot_service'
+import { LocalRepo } from './repos/local'
 
 dotenv.config()
 
